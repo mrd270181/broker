@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Posisi Broker</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Posisi Broker">
+<meta name="theme-color" content="#0F1C24">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+:root{--paper:#E4E9EC;--card:#fff;--ink:#0F1C24;--muted:#66798A;--line:#C9D3D9;--akum:#0E7C66;--dist:#B4442F;--r:10px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.45;padding-bottom:56px}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+header{position:relative;z-index:1;background:var(--ink);color:#EAF0F3;padding:10px 14px 12px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7E97A6;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.eyebrow button{background:none;border:1px solid #2B3D4A;color:#9DB3C0;border-radius:99px;font:inherit;font-size:10px;letter-spacing:.14em;padding:4px 10px;cursor:pointer}
+.eyebrow button:active{background:#1D2C37}
+.ticker{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;font-weight:800;font-size:36px;line-height:1.05;letter-spacing:-.02em;margin:6px 0 2px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ticker small{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;color:#7E97A6;letter-spacing:.06em}
+.searchwrap{position:relative;margin-top:10px}
+#q{width:100%;background:#1A2833;border:1px solid #2B3D4A;color:#EAF0F3;border-radius:var(--r);padding:11px 12px;font:inherit}
+#q::placeholder{color:#61798A}
+#q:focus{outline:2px solid #3E7F9E;outline-offset:1px}
+#suggest{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:var(--card);color:var(--ink);border-radius:var(--r);box-shadow:0 12px 30px rgba(15,28,36,.3);max-height:52vh;overflow:auto;display:none}
+#suggest.open{display:block}
+#suggest div{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;cursor:pointer}
+#suggest div:last-child{border-bottom:0}
+#suggest span{color:var(--muted);font-size:12px}
+.sortnote{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7E97A6;margin-top:8px}
+.modes{display:flex;gap:6px;margin-top:7px}
+.mbtn{background:#1A2833;border:1px solid #2B3D4A;color:#9DB3C0;border-radius:99px;padding:6px 13px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.mbtn[aria-pressed="true"]{background:#EAF0F3;color:#0F1C24;border-color:#EAF0F3}
+.facets{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 6px;position:sticky;top:0;z-index:30;background:var(--paper);scrollbar-width:none}
+.facets::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 13px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+main{padding:10px}
+.card{background:var(--card);border-radius:var(--r);overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;box-shadow:0 1px 2px rgba(15,28,36,.1)}
+table{width:100%;min-width:max-content;border-collapse:collapse}
+body{overflow-x:hidden}
+thead th{position:sticky;top:0;z-index:20;background:#F2F6F8;box-shadow:0 1px 0 var(--line);max-width:34vw;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:9px 10px;white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--line)}
+thead th:first-child{text-align:left;left:0;z-index:25;background:#F2F6F8;box-shadow:6px 0 6px -6px rgba(15,28,36,.18)}
+tbody td:first-child{position:sticky;left:0;background:var(--card);z-index:5;box-shadow:6px 0 6px -6px rgba(15,28,36,.18)}
+thead th[data-active="1"]{color:var(--ink)}
+tbody td{padding:0 9px;height:44px;border-bottom:1px solid #EBF0F3;text-align:right;font-size:14px;white-space:nowrap}
+tbody td:first-child{text-align:left;font-weight:600;padding-left:14px}
+tbody tr:last-child td{border-bottom:0}
+.bar{position:absolute;left:0;top:8px;width:3px;border-radius:2px;opacity:.85}
+.bar.pos{background:var(--akum)}.bar.neg{background:var(--dist)}
+.bname{position:relative}
+.bfull{display:block;font-weight:400;font-size:11px;color:var(--muted);line-height:1.2;max-width:44vw;overflow:hidden;text-overflow:ellipsis}
+td.pos{color:var(--akum)}td.neg{color:var(--dist)}
+tfoot td{padding:10px;font-size:13px;font-weight:600;text-align:right;background:#F2F6F8;border-top:1px solid var(--line)}
+tfoot td:first-child{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pad{padding:20px 16px;color:var(--muted)}
+.pad h2{font-family:"Bricolage Grotesque",sans-serif;color:var(--ink);font-size:19px;margin:0 0 6px}
+.btn{display:inline-block;background:var(--ink);color:#fff;border:0;border-radius:var(--r);padding:12px 16px;font:inherit;font-weight:600;cursor:pointer;margin-top:12px}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.pad textarea{width:100%;height:100px;margin-top:10px;border:1px solid var(--line);border-radius:var(--r);padding:10px;font-family:"IBM Plex Mono",monospace;font-size:12px}
+.steps{margin:10px 0 0;padding-left:18px;font-size:13.5px}
+.steps li{margin-bottom:5px}
+.foot{padding:14px;text-align:center;color:var(--muted);font-size:11px;font-family:"IBM Plex Mono",monospace;letter-spacing:.05em}
+.skel{height:44px;border-bottom:1px solid #EBF0F3;background:linear-gradient(90deg,#F4F7F9,#E9EEF1,#F4F7F9);background-size:200% 100%;animation:sh 1.2s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.skel{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow"><span id="stamp">memuat…</span><button id="import" type="button">Perbarui data</button></div>
+  <div class="ticker" id="ticker">—</div>
+  <div class="searchwrap">
+    <input id="q" type="text" placeholder="Cari emiten atau broker" autocomplete="off" spellcheck="false">
+    <div id="suggest"></div>
+  </div>
+  <div id="sortnote" class="sortnote"></div>
+  <div class="modes">
+    <button class="mbtn" data-m="em" type="button" aria-pressed="true">Per emiten</button>
+    <button class="mbtn" data-m="br" type="button" aria-pressed="false">Per broker</button>
+  </div>
+</header>
+<div class="facets" id="facets"></div>
+<main><div class="card" id="card"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></main>
+<div class="foot" id="foot"></div>
+<input id="pick" type="file" style="display:none">
+
+<script>
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vS3RBxk5bpb92B3f65LXrngaW_HTy6gyiYf_S_nh8g0l-EbsTE_LGxF4US4-tJbP0cZTU7ruoO74I0a/pub?gid=966604838&single=true&output=csv";
+const KEY="posisibroker:data";
+const STORE={
+  async get(k){
+    if(window.storage&&window.storage.get) return await window.storage.get(k);
+    const v=localStorage.getItem(k);
+    return v?{value:v}:null;
+  },
+  async set(k,v){
+    if(window.storage&&window.storage.set) return await window.storage.set(k,v);
+    localStorage.setItem(k,v);return{value:v};
+  }
+};
+
+/* ---------- CSV ---------- */
+function parseCSV(t){
+  t=t.replace(/^\uFEFF/,'');
+  const rows=[];let row=[],cell='',q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){ if(c==='"'){ if(t[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c; }
+    else if(c==='"')q=true;
+    else if(c===','){row.push(cell);cell='';}
+    else if(c==='\t'){row.push(cell);cell='';}
+    else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+    else if(c!=='\r')cell+=c;}
+  if(cell.length||row.length){row.push(cell);rows.push(row);}
+  return rows;
+}
+/* ---------- angka ---------- */
+const MULT={T:1e12,B:1e9,M:1e6,JT:1e6,RB:1e3,K:1e3};
+function toNum(raw){
+  if(raw==null)return null;
+  let s=String(raw).trim();if(!s)return null;
+  let neg=false;
+  if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1);}
+  s=s.replace(/^Rp\.?\s*/i,'').replace(/\s/g,'');
+  if(s[0]==='-'){neg=true;s=s.slice(1);}
+  let mult=1;const suf=s.match(/(JT|RB|[TBMK])$/i);
+  if(suf){mult=MULT[suf[1].toUpperCase()]||1;s=s.slice(0,-suf[1].length);}
+  const d=s.lastIndexOf('.'),k=s.lastIndexOf(',');
+  if(d>-1&&k>-1){ s = k>d ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,''); }
+  else if(k>-1){ s = (mult>1||s.slice(k+1).length!==3) ? s.replace(',','.') : s.replace(/,/g,''); }
+  else if(d>-1&&/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+  if(!/^\d*\.?\d+$/.test(s))return null;
+  const n=parseFloat(s)*mult;
+  return isNaN(n)?null:(neg?-n:n);
+}
+const fmtInt=n=>n==null?'–':Math.round(n).toLocaleString('id-ID');
+function fmtBig(n){
+  if(n==null)return '–';
+  const a=Math.abs(n),s=n<0?'-':'';
+  if(a>=1e12)return s+(a/1e12).toFixed(2).replace('.',',')+' T';
+  if(a>=1e9) return s+(a/1e9).toFixed(2).replace('.',',')+' M';
+  if(a>=1e6) return s+(a/1e6).toFixed(1).replace('.',',')+' Jt';
+  return fmtInt(n);
+}
+/* ---------- struktur ---------- */
+const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const EM=['EMITEN','KODEEMITEN','KODESAHAM','SAHAM','TICKER','KODE','STOCK'];
+const BR=['BROKER','KODEBROKER','BROKERCODE','KDBROKER','ANGGOTABURSA'];
+const NM=['NAMABROKER','NAMA','BROKERNAME','NAMAPERUSAHAAN'];
+function headerRow(rows){
+  for(let i=0;i<Math.min(rows.length,15);i++){
+    const k=rows[i].map(norm);
+    if(k.filter(Boolean).length>=2&&k.some(x=>EM.includes(x)||BR.includes(x)))return i;
+  }
+  for(let i=0;i<rows.length;i++) if(rows[i].filter(c=>String(c).trim()).length>=2)return i;
+  return 0;
+}
+function build(rows){
+  const hi=headerRow(rows),head=rows[hi].map(h=>String(h).trim()),keys=head.map(norm);
+  const body=rows.slice(hi+1).filter(r=>r.some(c=>String(c).trim()));
+  const by=l=>keys.findIndex(k=>l.includes(k)),like=re=>keys.findIndex(k=>re.test(k));
+  let iE=by(EM);if(iE<0)iE=like(/EMITEN|SAHAM|TICKER/);
+  let iB=by(BR);if(iB<0)iB=like(/BROKER/);
+  let iN=by(NM);if(iN===iB)iN=-1;
+  if(iB<0&&iN>=0){iB=iN;iN=-1;}
+  if(iE<0)iE=0; if(iB<0)iB=Math.min(1,head.length-1);
+  let last='';const recs=[];
+  for(const r of body){
+    let em=String(r[iE]||'').trim();
+    if(em)last=em;else em=last;
+    const br=String(r[iB]||'').trim();
+    if(!em||!br||/^(TOTAL|JUMLAH|GRAND ?TOTAL|SUM)$/i.test(br))continue;
+    recs.push({em:em.toUpperCase(),br:br.toUpperCase(),nm:iN>=0?String(r[iN]||'').trim():'',raw:r});
+  }
+  const numeric=[],facets=[];
+  head.forEach((h,i)=>{
+    if(i===iE||i===iB||i===iN||!h)return;
+    let hit=0,seen=0;const vals=new Set();
+    for(const rec of recs.slice(0,400)){
+      const v=String(rec.raw[i]||'').trim();if(!v)continue;
+      seen++;vals.add(v.toUpperCase());if(toNum(v)!==null)hit++;
+    }
+    if(!seen)return;
+    if(hit/seen>=.7)numeric.push({i,label:h,key:keys[i]});
+    else if(vals.size<=8)facets.push({i,label:h,values:[...vals].sort()});
+  });
+  const main=numeric.find(c=>/NET/.test(c.key))||numeric.find(c=>/^(SALDO|POSISI)/.test(c.key))
+           ||numeric.find(c=>/LOT/.test(c.key))||numeric[numeric.length-1]||null;
+  const brokerName={};
+  for(const r of recs) if(r.nm&&!brokerName[r.br]) brokerName[r.br]=r.nm;
+  return {head,recs,numeric,facets,main,brokerName,
+          emitens:[...new Set(recs.map(r=>r.em))].sort(),
+          brokers:[...new Set(recs.map(r=>r.br))].sort()};
+}
+/* ---------- tampilan ---------- */
+let DATA=null,cur=null,sortCol=null,sortDir=-1,facetSel={},savedAt=null,mode='em';
+function render(){
+  const card=document.getElementById('card');
+  if(!DATA)return;
+  const list=mode==='em'?DATA.emitens:DATA.brokers;
+  if(!cur||!list.includes(cur))cur=list[0];
+  const sub=mode==='em'?(DATA.emitens.length+' emiten'):(DATA.brokerName[cur]||DATA.brokers.length+' broker');
+  document.getElementById('ticker').innerHTML=cur+' <small>'+sub+'</small>';
+  const scNow=sortCol||DATA.main;
+  document.getElementById('sortnote').textContent = scNow ? ('urut: '+scNow.label+(sortDir<0?' ▼':' ▲')) : '';
+  let rows=DATA.recs.filter(r=>(mode==='em'?r.em:r.br)===cur);
+  for(const f of DATA.facets){const s=facetSel[f.i];if(s)rows=rows.filter(r=>String(r.raw[f.i]||'').trim().toUpperCase()===s);}
+  const cols=DATA.numeric,sc=sortCol||DATA.main;
+  if(sc)rows.sort((a,b)=>{const x=toNum(a.raw[sc.i]),y=toNum(b.raw[sc.i]);
+    return ((y==null?-Infinity:y)-(x==null?-Infinity:x))*(sortDir<0?1:-1);});
+  if(!rows.length){card.innerHTML='<div class="pad"><h2>Tidak ada baris</h2>Kombinasi ini kosong dengan filter yang aktif. Ubah filter di atas, atau pilih yang lain.</div>';return;}
+  const maxAbs=sc?Math.max(...rows.map(r=>Math.abs(toNum(r.raw[sc.i])||0)),1):1;
+  const isRp=c=>/VALUE|NILAI|RUPIAH|^RP|AVG|HARGA|PRICE/.test(c.key);
+  let h='<table><thead><tr><th data-c="-1">'+(mode==='em'?'Broker':'Emiten')+'</th>';
+  cols.forEach((c,ix)=>{const on=sc&&sc.i===c.i;
+    h+='<th data-c="'+ix+'"'+(on?' data-active="1"':'')+'>'+c.label+(on?(sortDir<0?' ▼':' ▲'):'')+'</th>';});
+  h+='</tr></thead><tbody>';
+  for(const r of rows){
+    h+='<tr><td>';
+    if(sc){const v=toNum(r.raw[sc.i])||0;
+      const pct=Math.max(8,Math.abs(v)/maxAbs*100);
+      h+='<div class="bar '+(v<0?'neg':'pos')+'" style="height:calc('+pct.toFixed(1)+'% - 16px);min-height:6px"></div>';}
+    h+='<span class="bname">'+(mode==='em'?(r.br+(r.nm?'<span class="bfull">'+r.nm+'</span>':'')):r.em)+'</span></td>';
+    for(const c of cols){const v=toNum(r.raw[c.i]);
+      h+='<td class="num '+(v==null?'':(v<0?'neg':(v>0?'pos':'')))+'">'+(v==null?(String(r.raw[c.i]||'').trim()||'–'):(isRp(c)?fmtBig(v):fmtInt(v)))+'</td>';}
+    h+='</tr>';
+  }
+  h+='</tbody><tfoot><tr><td>'+rows.length+(mode==='em'?' broker':' emiten')+'</td>';
+  for(const c of cols){const t=rows.reduce((s,r)=>s+(toNum(r.raw[c.i])||0),0);
+    h+='<td class="num">'+(isRp(c)?fmtBig(t):fmtInt(t))+'</td>';}
+  h+='</tr></tfoot></table>';
+  card.innerHTML=h;
+  card.querySelectorAll('th').forEach(th=>th.onclick=()=>{
+    const ix=+th.dataset.c;if(ix<0)return;const c=cols[ix];
+    if(sc&&sc.i===c.i)sortDir=-sortDir;else{sortCol=c;sortDir=-1;}
+    render();});
+}
+function renderFacets(){
+  const el=document.getElementById('facets');
+  if(!DATA||!DATA.facets.length){el.innerHTML='';return;}
+  let h='';
+  for(const f of DATA.facets){
+    h+='<button class="chip" data-f="'+f.i+'" data-v="" aria-pressed="'+(!facetSel[f.i])+'">Semua '+f.label.toLowerCase()+'</button>';
+    for(const v of f.values)h+='<button class="chip" data-f="'+f.i+'" data-v="'+v+'" aria-pressed="'+(facetSel[f.i]===v)+'">'+v+'</button>';
+  }
+  el.innerHTML=h;
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+    const f=b.dataset.f,v=b.dataset.v;
+    if(v)facetSel[f]=v;else delete facetSel[f];
+    renderFacets();render();});
+}
+/* ---------- cari ---------- */
+const q=document.getElementById('q'),sug=document.getElementById('suggest');
+q.addEventListener('input',()=>{
+  if(!DATA)return;
+  const t=q.value.trim().toUpperCase();
+  if(!t){sug.classList.remove('open');return;}
+  const hits=[];
+  const seenE=new Set(),seenB=new Set();
+  for(const em of DATA.emitens){
+    if(em.includes(t)&&!seenE.has(em)){seenE.add(em);hits.push({v:em,m:'em',note:'emiten'});}
+    if(hits.length>14)break;}
+  for(const br of DATA.brokers){
+    const nm=DATA.brokerName[br]||'';
+    if((br.includes(t)||nm.toUpperCase().includes(t))&&!seenB.has(br)){seenB.add(br);hits.push({v:br,m:'br',note:nm||'broker'});}
+    if(hits.length>28)break;}
+  sug.innerHTML=hits.length?hits.map(x=>'<div data-em="'+x.v+'" data-m="'+x.m+'">'+x.v+'<span>'+x.note+'</span></div>').join(''):'<div><span>Tidak ada yang cocok</span></div>';
+  sug.classList.add('open');
+  sug.querySelectorAll('[data-em]').forEach(d=>d.onclick=()=>{
+    if(d.dataset.m&&d.dataset.m!==mode){
+      mode=d.dataset.m;sortCol=null;sortDir=-1;
+      document.querySelectorAll('.mbtn').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mode));
+    }
+    cur=d.dataset.em;q.value='';q.blur();sug.classList.remove('open');window.scrollTo({top:0});render();});
+});
+document.addEventListener('click',e=>{if(!sug.contains(e.target)&&e.target!==q)sug.classList.remove('open');});
+/* ---------- masuk data ---------- */
+function stamp(){
+  document.getElementById('stamp').textContent = savedAt
+    ? 'data '+new Date(savedAt).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+    : 'data belum masuk';
+}
+async function save(text){
+  savedAt=Date.now();
+  try{ await STORE.set(KEY,JSON.stringify({csv:text,at:savedAt})); }catch(e){}
+}
+function ingest(text,persist){
+  const d=build(parseCSV(text));
+  if(!d.recs.length){importer('Isi terbaca, tetapi tidak ada baris emiten dan broker yang dikenali. Pastikan yang diambil adalah sheet Posisi Broker, satu baris per emiten dan broker, dengan satu baris judul kolom.');return;}
+  DATA=d;cur=null;sortCol=null;sortDir=-1;facetSel={};
+  if(persist)save(text);else stamp();
+  if(persist)stamp();
+  document.getElementById('foot').textContent=DATA.recs.length.toLocaleString('id-ID')+' baris · '+DATA.numeric.length+' kolom angka';
+  renderFacets();render();
+}
+function importer(msg){
+  stamp();
+  document.getElementById('card').innerHTML=
+   '<div class="pad"><h2>Masukkan data</h2>'+(msg||'Google memblokir pengambilan otomatis dari dalam halaman ini, jadi datanya dimasukkan sekali lalu tersimpan di app. Buka berikutnya langsung tampil.')+
+   '<ol class="steps"><li>Buka file tracker Anda, pilih sheet Posisi Broker.</li>'+
+   '<li>Unduh sebagai CSV, atau salin seluruh tabelnya.</li>'+
+   '<li>Tekan tombol di bawah.</li></ol>'+
+   '<button class="btn" id="bpick" type="button">Pilih file CSV atau XLSX</button> '+
+   '<button class="btn ghost" id="btry" type="button">Coba tarik dari link</button>'+
+   '<textarea id="paste" placeholder="atau tempel tabelnya di sini"></textarea>'+
+   '<button class="btn" id="bgo" type="button">Tampilkan</button></div>';
+  document.getElementById('bpick').onclick=()=>document.getElementById('pick').click();
+  document.getElementById('btry').onclick=()=>tarik();
+  document.getElementById('bgo').onclick=()=>{
+    const v=document.getElementById('paste').value.trim();
+    if(v)ingest(v,true);};
+}
+document.getElementById('pick').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{
+    const buf=await f.arrayBuffer();
+    const b=new Uint8Array(buf.slice(0,4));
+    const isZip=b[0]===0x50&&b[1]===0x4B;                       // xlsx
+    const isPdf=b[0]===0x25&&b[1]===0x50&&b[2]===0x44&&b[3]===0x46; // pdf
+    if(isPdf){ importer('File itu PDF hasil cetak, bukan tabel. Yang dibutuhkan file CSV atau XLSX dari sheet Posisi Broker.'); e.target.value='';return; }
+    if(isZip){
+      if(!window.XLSX)await new Promise((ok,no)=>{
+        const sc=document.createElement('script');
+        sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        sc.onload=ok;sc.onerror=no;document.head.appendChild(sc);});
+      const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
+      const nm=wb.SheetNames.find(n=>/POSISI/i.test(n))||wb.SheetNames[0];
+      ingest(XLSX.utils.sheet_to_csv(wb.Sheets[nm]),true);
+    } else {
+      const txt=new TextDecoder('utf-8').decode(buf);
+      if(!txt.trim()){ importer('File itu kosong. Coba unduh ulang sheet Posisi Broker sebagai CSV.'); }
+      else ingest(txt,true);
+    }
+  }catch(err){ importer('File itu tidak bisa dibaca di sini ('+(err&&err.message?err.message:'gagal')+'). Coba simpan sheet Posisi Broker sebagai CSV lalu ulangi.'); }
+  e.target.value='';
+});
+async function tarik(){
+  document.getElementById('card').innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+  try{
+    const res=await fetch(CSV_URL+'&_='+Date.now());
+    if(!res.ok)throw 0;
+    const t=await res.text();
+    if(!t.trim())throw 0;
+    ingest(t,true);return;
+  }catch(e){}
+  importer('Link publikasi tetap ditolak browser. Masukkan datanya lewat file atau tempel di bawah ini.');
+}
+document.querySelectorAll('.mbtn').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.m;cur=null;sortCol=null;sortDir=-1;
+  q.placeholder=mode==='em'?'Cari emiten (atau broker)':'Cari broker (atau emiten)';
+  document.querySelectorAll('.mbtn').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mode));
+  q.value='';sug.classList.remove('open');render();});
+document.getElementById('import').onclick=()=>importer();
+(async function start(){
+  try{
+    const r=await STORE.get(KEY);
+    if(r&&r.value){const o=JSON.parse(r.value);savedAt=o.at;ingest(o.csv,false);stamp();return;}
+  }catch(e){}
+  tarik();
+})();
+</script>
+</body>
+</html>
